@@ -3,6 +3,8 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+#pdf 
+Portfolio-01-Production-RAG-Service.docx
 # C extensions
 *.so
 
