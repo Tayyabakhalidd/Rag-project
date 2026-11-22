@@ -6,13 +6,35 @@ development). Secrets are typed as ``SecretStr`` so they never appear in
 ``.get_secret_value()`` explicitly at the single place a key is needed.
 """
 
+from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+CORPUS_DIR = PROJECT_ROOT / "corpus"
+
+
+@dataclass(frozen=True)
+class ChunkConfig:
+    """One chunking strategy: target chunk size and overlap, in characters."""
+
+    name: str
+    chunk_size: int
+    chunk_overlap: int
+
+
+# The two configurations compared in the evaluation (see DESIGN.md / EVAL.md).
+CHUNK_CONFIGS: dict[str, ChunkConfig] = {
+    "A": ChunkConfig(name="A", chunk_size=1000, chunk_overlap=150),
+    "B": ChunkConfig(name="B", chunk_size=500, chunk_overlap=75),
+}
+
+# File types accepted for upload, keyed by lower-case extension.
+SUPPORTED_EXTENSIONS: dict[str, str] = {".pdf": "pdf", ".docx": "docx"}
 
 
 class Settings(BaseSettings):
@@ -51,6 +73,26 @@ class Settings(BaseSettings):
 
     # --- Reliability -------------------------------------------------------
     external_max_retries: int = Field(default=2, ge=0, le=5, description="Retries for LLM/embedding calls")
+
+    # --- Upload limits -----------------------------------------------------
+    max_upload_mb: int = Field(default=20, ge=1, description="Largest accepted upload, in MB")
+    max_pdf_pages: int = Field(default=500, ge=1)
+    max_docx_uncompressed_mb: int = Field(default=100, ge=1, description="ZIP-bomb guard for DOCX files")
+    max_docx_zip_entries: int = Field(default=5000, ge=10)
+
+    # --- Chunking ----------------------------------------------------------
+    chunk_config: Literal["A", "B"] = Field(default="A", description="Active chunking configuration")
+    min_chunk_chars: int = Field(default=20, ge=1, description="Drop chunks shorter than this (non-space chars)")
+
+    @property
+    def max_upload_bytes(self) -> int:
+        """Upload size limit in bytes."""
+        return self.max_upload_mb * 1024 * 1024
+
+    @property
+    def active_chunk_config(self) -> ChunkConfig:
+        """The chunking configuration selected by ``chunk_config``."""
+        return CHUNK_CONFIGS[self.chunk_config]
 
     @property
     def groq_configured(self) -> bool:

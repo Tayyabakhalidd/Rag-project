@@ -31,6 +31,14 @@ class EmptyDocumentError(AppError):
     message = "The file is empty or contains no extractable text."
 
 
+class InvalidDocumentError(AppError):
+    """The file is corrupt, encrypted, or unsafe to process (e.g. a ZIP bomb)."""
+
+    status_code = 400
+    code = "invalid_document"
+    message = "The file is corrupt, password-protected, or cannot be processed safely."
+
+
 class GuardrailBlockedError(AppError):
     status_code = 400
     code = "guardrail_blocked"
