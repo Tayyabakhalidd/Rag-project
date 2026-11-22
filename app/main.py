@@ -16,23 +16,33 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.api.qa import router as qa_router
 from app.api.routes import router as api_router
+from app.api.ui import router as ui_router
 from app.config import Settings, get_settings
 from app.errors import AppError
+from app.generation import GroqLLM, LLMClient
+from app.guardrails import RateLimiter
+from app.ingestion.embed import Embedder, build_embedder
 from app.logging_setup import configure_logging
 from app.middleware import RequestContextMiddleware
+from app.retrieval import Retriever
+from app.services.document_service import DocumentService
+from app.services.qa_service import QAService
 from app.storage.registry import DocumentRegistry
 from app.storage.vector_store import ChromaVectorStore
-from app.services.document_service import DocumentService
 
 logger = logging.getLogger("app")
 
 
-def _error_response(request: Request, status_code: int, code: str, message: str, details: dict) -> JSONResponse:
+def _error_response(
+    request: Request, status_code: int, code: str, message: str, details: dict, headers: dict | None = None
+) -> JSONResponse:
     """Build the single error shape used by every error response."""
     request.state.error_code = code  # picked up by the access log
     return JSONResponse(
         status_code=status_code,
+        headers=headers or None,
         content={
             "error": {
                 "code": code,
@@ -51,7 +61,7 @@ def register_exception_handlers(app: FastAPI) -> None:
     async def handle_app_error(request: Request, exc: AppError) -> JSONResponse:
         if exc.status_code >= 500:
             logger.warning("Service error: %s", exc.code)
-        return _error_response(request, exc.status_code, exc.code, exc.message, exc.details)
+        return _error_response(request, exc.status_code, exc.code, exc.message, exc.details, exc.headers)
 
     @app.exception_handler(RequestValidationError)
     async def handle_validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
@@ -73,8 +83,18 @@ def register_exception_handlers(app: FastAPI) -> None:
         return _error_response(request, exc.status_code, code, message, {})
 
 
-def create_app(settings: Settings | None = None, document_service: DocumentService | None = None) -> FastAPI:
-    """Build and configure the FastAPI application."""
+def create_app(
+    settings: Settings | None = None,
+    *,
+    embedder: Embedder | None = None,
+    llm: LLMClient | None = None,
+) -> FastAPI:
+    """Build and configure the FastAPI application.
+
+    ``embedder`` and ``llm`` default to the real Gemini and Groq clients.
+    Tests pass deterministic fakes, so the test suite never calls a paid or
+    live API.
+    """
     settings = settings or get_settings()
     configure_logging(settings.log_level, settings.secret_values())
 
@@ -89,16 +109,24 @@ def create_app(settings: Settings | None = None, document_service: DocumentServi
     )
     # Make route dependencies use the same settings object the app was built with.
     app.dependency_overrides[get_settings] = lambda: settings
-    if document_service is None:
-        settings.data_dir.mkdir(parents=True, exist_ok=True)
-        registry = DocumentRegistry(settings.data_dir / "documents.sqlite3")
-        vectors = ChromaVectorStore(settings.data_dir / "chroma")
-        document_service = DocumentService(settings, registry, vectors)
-    app.state.document_service = document_service
+    app.state.settings = settings
+
+    # Shared components: one registry, one vector collection, one cached embedder.
+    settings.data_dir.mkdir(parents=True, exist_ok=True)
+    registry = DocumentRegistry(settings.data_dir / "documents.sqlite3")
+    vectors = ChromaVectorStore(settings.data_dir / "chroma")
+    cached_embedder = build_embedder(settings, registry, embedder)
+    retriever = Retriever(vectors, cached_embedder)
+    app.state.document_service = DocumentService(settings, registry, vectors, cached_embedder)
+    app.state.qa_service = QAService(settings, registry, retriever, llm or GroqLLM(settings))
+    app.state.question_limiter = RateLimiter(settings.questions_per_minute)
+    app.state.upload_limiter = RateLimiter(settings.uploads_per_minute)
 
     app.add_middleware(RequestContextMiddleware)
     register_exception_handlers(app)
     app.include_router(api_router)
+    app.include_router(qa_router)
+    app.include_router(ui_router)
     return app
 
 

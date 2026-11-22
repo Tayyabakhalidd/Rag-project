@@ -1,4 +1,13 @@
-"""SQLite document registry and successful-embedding cache."""
+"""SQLite document registry and successful-embedding cache.
+
+The ``documents`` table is the list of uploaded files. Its ``sha256`` column is
+UNIQUE, so two simultaneous uploads of the same bytes cannot both succeed. A
+row starts as ``processing`` and becomes ``ready`` only after its vectors are
+stored; listing and answering only see ``ready`` documents.
+
+The ``embedding_cache`` table maps a hash of (model, dimensions, text) to a
+vector, so unchanged text is never sent to the embedding API twice.
+"""
 
 import json
 import sqlite3
@@ -67,6 +76,20 @@ class DocumentRegistry:
         with self._connect() as db:
             rows = db.execute("SELECT * FROM documents WHERE status='ready' ORDER BY created_at,document_id").fetchall()
         return [dict(row) for row in rows]
+
+    def count_ready(self) -> int:
+        with self._connect() as db:
+            return db.execute("SELECT COUNT(*) FROM documents WHERE status='ready'").fetchone()[0]
+
+    def missing_ids(self, document_ids: list[str]) -> list[str]:
+        """Return the IDs from ``document_ids`` that are not ready documents."""
+        ready = {doc["document_id"] for doc in self.list_ready()}
+        return [doc_id for doc_id in document_ids if doc_id not in ready]
+
+    def clear_documents(self) -> None:
+        """Remove every document row (the embedding cache is kept). Used by the evaluation."""
+        with self._connect() as db:
+            db.execute("DELETE FROM documents")
 
     def get_embedding(self, cache_key: str) -> list[float] | None:
         with self._connect() as db:

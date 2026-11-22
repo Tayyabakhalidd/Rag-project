@@ -1,0 +1,97 @@
+config,id,question,answer,reference_answer,cited_passages,judge_faithful,judge_correctness,human_faithful,human_correctness
+A,q01,What are the four functions of the AI RMF Core?,"The AI RMF Core is organized around four high‑level functions: GOVERN, MAP, MEASURE, and MANAGE [C1][C3].","GOVERN, MAP, MEASURE and MANAGE. Each function is broken down into categories and subcategories.","[C1] Part 2: Core and Profiles
+5. AI RMF Core
+The AI RMF Core provides outcomes and actions that enable dialogue, understanding, and
+activities to manage AI risks and responsibly develop trustworthy AI systems. As illustrated in Figure 5, the Core is composed of four functions: GOVERN, MAP, MEASURE,
+and MANAGE. Each of these high-level functions is broken down into categories and subcategories. Categor || [C3] valid and reliable, safe, secure and resilient, accountable and transparent, explainable and
+interpretable, privacy enhanced, and fair with their harmful biases managed.
+Part 2 comprises the “Core” of the Framework. It describes four specific functions to help
+organizations address the risks of AI systems in practice. These functions – GOVERN,
+MAP, MEASURE, and MANAGE – are broken down further int",True,2,,
+A,q03,Which law directed NIST to develop the AI Risk Management Framework?,The development of the AI Risk Management Framework was directed by the National AI Initiative Act of 2020 [C1].,The National Artificial Intelligence Initiative Act of 2020 (P.L. 116-283).,"[C1] Framework are included in the AI RMF Playbook,
+which is available via the NIST AI RMF website:
+https://www.nist.gov/itl/ai-risk-management-framework.
+Development of the AI RMF by NIST in collaboration with the private and public sectors is directed and consistent with its broader AI efforts called for by the National AI
+Initiative Act of 2020, the National Security Commission on Artificial Intelli",True,2,,
+A,q05,What are the three major categories of AI bias described in the AI RMF?,"The AI RMF identifies three major categories of AI bias: systemic bias, computational and statistical bias, and human‑cognitive bias.[C1]","Systemic bias, computational and statistical bias, and human-cognitive bias.","[C1] Bias is broader than demographic balance and data representativeness. NIST has identified
+three major categories of AI bias to be considered and managed: systemic, computational
+and statistical, and human-cognitive. Each of these can occur in the absence of prejudice,
+partiality, or discriminatory intent. Systemic bias can be present in AI datasets, the organizational norms, practices, and process",True,2,,
+A,q07,Does the AI RMF prescribe a level of risk tolerance for organizations?,The AI RMF does not prescribe a specific level of risk tolerance for organizations; it notes that risk tolerance is contextual and must be defined by the organization itself [C1].,"No. The AI RMF can be used to prioritize risk but does not prescribe risk tolerance; risk tolerance is contextual and can be influenced by legal or regulatory requirements and by policies and norms of system owners, organizations, industries, communities or policy makers.","[C1] 1.2.2 Risk Tolerance
+While the AI RMF can be used to prioritize risk, it does not prescribe risk tolerance. Risk
+tolerance refers to the organization’s or AI actor’s (see Appendix A) readiness to bear the
+risk in order to achieve its objectives. Risk tolerance can be influenced by legal or regulatory requirements (Adapted from: ISO GUIDE 73). Risk tolerance and the level of risk that
+is acceptable",True,2,,
+A,q09,Which four primary considerations did the Generative AI Public Working Group focus on?,"The Generative AI Public Working Group focused on four primary considerations: Governance, Content Provenance, Pre‑deployment Testing, and Incident Disclosure [C1][C2].","Governance, Content Provenance, Pre-deployment Testing, and Incident Disclosure.","[C1] This work was informed by public feedback and consultations with diverse stakeholder groups as part of NIST’s
+Generative AI Public Working Group (GAI PWG). The GAI PWG was an open, transparent, and collaborative
+process, facilitated via a virtual workspace, to obtain multistakeholder input on GAI risk management and to
+inform NIST’s approach.
+The focus of the GAI PWG was limited to four primary co || [C2] Appendix A. Primary GAI Considerations
+The following primary considerations were derived as overarching themes from the GAI PWG
+consultation process. These considerations (Governance, Pre-Deployment Testing, Content Provenance,
+and Incident Disclosure) are relevant for voluntary use by any organization designing, developing, and
+using GAI and also inform the Actions to Manage GAI risks. Informatio",True,2,,
+A,q11,What is the difference between direct and indirect prompt injection?,"Direct prompt injection occurs when a user's prompt input directly alters the behavior of the model in unintended or unexpected ways, often by the attacker crafting a malicious prompt that is fed straight into the system [C1][C3]. Indirect prompt injection occurs when an LLM receives input from external sources such as websites or files, and the content retrieved is crafted to manipulate the model when it is later processed, effectively injecting the prompt without a direct user interface [C1][C4].",Direct prompt injection is when a user's own prompt input alters the model's behavior in unintended ways (intentionally or not). Indirect prompt injection is when the LLM accepts input from external sources such as websites or files whose content alters the model's behavior.,"[C1] Injection Vulnerabilities
+Direct Prompt Injections
+Direct prompt injections occur when a user's prompt input directly alters the behavior of the
+model in unintended or unexpected ways. The input can be either intentional (i.e., a malicious
+actor deliberately crafting a prompt to exploit the model) or unintentional (i.e., a user
+inadvertently providing input that triggers unexpected behavior).
+Indi || [C3] Augmented Generation (RAG) and fine-tuning aim to
+make LLM outputs more relevant and accurate, research shows that they do not fully mitigate
+prompt injection vulnerabilities.
+While prompt injection and jailbreaking are related concepts in LLM security, they are often used
+interchangeably. Prompt injection involves manipulating model responses through specific inputs
+to alter its behavior, which c || [C4] value chain (e.g., data inputs, processing, GAI training, or deployment environments), conventional
+cybersecurity practices may need to adapt or evolve.
+For instance, prompt injection involves modifying what input is provided to a GAI system so that it
+behaves in unintended ways. In direct prompt injections, attackers might craft malicious prompts and
+input them directly to a GAI system, with a va",True,2,,
+A,q13,"According to OWASP, should a system prompt be treated as a secret or a security control?","According to OWASP, the system prompt should not be considered a secret, nor should it be used as a security control.[C2]","No. The system prompt should not be considered a secret or used as a security control, so sensitive data such as credentials or connection strings should not be placed in it.","[C2] LLM07:2025 System Prompt Leakage
+Description
+The system prompt leakage vulnerability in LLMs refers to the risk that the system prompts or
+instructions used to steer the behavior of the model can also contain sensitive information that
+was not intended to be discovered. System prompts are designed to guide the model's output
+based on the requirements of the application, but may inadvertently conta",True,2,,
+A,q16,"When a generative model confidently makes things up, what does the NIST profile call it?",The NIST profile refers to a generative model confidently making things up as “Confabulation.”[C2],Confabulation (also colloquially called hallucinations or fabrications).,"[C2] 2.2. Confabulation
+“Confabulation” refers to a phenomenon in which GAI systems generate and confidently present
+erroneous or false content in response to prompts. Confabulations also include generated outputs that
+diverge from the prompts or other input or that contradict previously generated statements in the same
+context. These phenomena are colloquially also referred to as “hallucinations” or “",True,2,,
+A,q18,What problem arises when users trust a chatbot's answers too much without checking them?,"When users place excessive trust in a chatbot's answers without verification, they may fall victim to overreliance, leading them to act on factual inaccuracies or confabulated content, which can result in misguided decisions and potential harms.[C3][C5]","Overreliance: users place excessive trust in LLM-generated content and fail to verify it, which worsens the impact of misinformation as incorrect data enters critical decisions.","[C3] a
+major source of misinformation, they are not the only cause; biases introduced by the training
+data and incomplete information can also contribute.
+A related issue is overreliance. Overreliance occurs when users place excessive trust in LLMgenerated content, failing to verify its accuracy. This overreliance exacerbates the impact of
+misinformation, as users may integrate incorrect data into crit || [C5] of GAI technology, over time, humans may
+over-rely on GAI systems or may unjustifiably perceive GAI content to be of higher quality than that
+produced by other sources. This phenomenon is an example of automation bias, or excessive deference
+to automated systems. Automation bias can exacerbate other risks of GAI, such as risks of confabulation
+or risks of bias or homogenization.
+There may also be ",True,2,,
+A,q20,Which kinds of AI bias can happen even when nobody intends to discriminate?,"Systemic bias, computational and statistical bias, and human‑cognitive bias can all occur even in the absence of prejudice, partiality, or discriminatory intent.[C1]","All three categories (systemic, computational and statistical, and human-cognitive) can occur in the absence of prejudice, partiality, or discriminatory intent.","[C1] Bias is broader than demographic balance and data representativeness. NIST has identified
+three major categories of AI bias to be considered and managed: systemic, computational
+and statistical, and human-cognitive. Each of these can occur in the absence of prejudice,
+partiality, or discriminatory intent. Systemic bias can be present in AI datasets, the organizational norms, practices, and process",True,2,,
+A,q23,How do the OWASP Top 10 and the NIST Generative AI Profile each describe risks from third-party components such as pre-trained models?,"The OWASP Top 10 for LLM applications flags several third‑party component risks, including the danger of vulnerable pre‑trained models that may contain hidden biases, backdoors, or malicious modifications such as poisoning or tampering (e.g., ROME) [C2], the lack of strong provenance guarantees for published models, which means attackers could compromise supplier accounts and supply compromised models [C2], unclear terms‑and‑conditions and data‑privacy policies that can lead to sensitive data being harvested for model training [C4], and broader supply‑chain threats such as outdated third‑party packages, licensing issues, and on‑device LLM attack surfaces [C5].
+
+The NIST Generative AI Profile similarly emphasizes third‑party considerations, noting that integrating external GAI services can raise intellectual‑property, data‑privacy, and information‑security risks and that organizations should apply clear transparency and risk‑management controls—including due‑diligence, software bills of materials (SBOMs), service‑level agreements (SLAs), and attestation reports—to manage those risks for foundation models, fine‑tuned models, and embedded tools [C1].","OWASP LLM03 Supply Chain: supply chains are vulnerable through third-party pre-trained models and data that can be tampered with or poisoned. NIST AI 600-1 Value Chain and Component Integration: non-transparent integration of upstream third-party components, improperly obtained data and poor supplier vetting reduce transparency and accountability.","[C2] 4. Vulnerable Pre-Trained Model
+Models are binary black boxes and unlike open source, static inspection can offer little to
+security assurances. Vulnerable pre-trained models can contain hidden biases, backdoors, or
+other malicious features that have not been identified through the safety evaluations of
+model repository. Vulnerable models can be created by both poisoned datasets and direct
+model t || [C4] tampered models.
+9. Unclear T&Cs and Data Privacy Policies
+Unclear T&Cs and data privacy policies of the model operators lead to the application's
+sensitive data being used for model training and subsequent sensitive information exposure.
+This may also apply to risks from using copyrighted material by the model supplier.
+Prevention and Mitigation Strategies
+1. Carefully vet data sources and suppli || [C5] methods like ""LoRA"" (Low-Rank Adaptation) and ""PEFT""
+(Parameter-Efficient Fine-Tuning), especially on platforms like Hugging Face, introduce new
+supply-chain risks. Finally, the emergence of on-device LLMs increase the attack surface and
+supply-chain risks for LLM applications.
+Some of the risks discussed here are also discussed in ""LLM04 Data and Model Poisoning."" This
+entry focuses on the supply || [C1] addressing third-party considerations.
+Third party GAI integrations may give rise to increased intellectual property, data privacy, or information
+security risks, pointing to the need for clear guidelines for transparency and risk management regarding
+the collection and use of third-party data for model inputs. Organizations may consider varying risk
+controls for foundation models, fine-tuned mode",True,2,,

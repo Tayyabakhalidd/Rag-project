@@ -13,6 +13,8 @@ Portfolio-01-*.pdf
 
 # Runtime data: uploads, Chroma vectors, SQLite registry and embedding cache
 data/runtime/
+# Temporary pytest folder used with --basetemp=.pytest_tmp
+.pytest_tmp/
 
 # Any env file except the placeholder template
 .env.*

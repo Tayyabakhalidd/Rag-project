@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Production RAG Service</title>
+  <!-- Pico.css (classless styling for forms and tables), pinned to major version 2 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<header class="container">
+  <hgroup>
+    <h1>Production RAG Service</h1>
+    <p>Upload PDF or DOCX documents, ask questions, and read answers with citations to the retrieved passages.</p>
+  </hgroup>
+  <p class="status-line">
+    <span class="pill {{ 'ok' if embeddings_configured else 'bad' }}">Embeddings {{ 'configured' if embeddings_configured else 'not configured' }}</span>
+    <span class="pill {{ 'ok' if llm_configured else 'bad' }}">LLM {{ 'configured' if llm_configured else 'not configured' }}</span>
+    <a href="/docs">API docs</a>
+  </p>
+</header>
+
+<main class="container">
+  {% if notice %}
+  <div class="banner success" role="status">{{ notice }}</div>
+  {% endif %}
+  {% if error %}
+  <div class="banner error" role="alert">
+    <strong>{{ error.status }} {{ error.title }}</strong> <code>{{ error.code }}</code><br>
+    {{ error.message }}
+  </div>
+  {% endif %}
+
+  <section id="upload">
+    <h2>1. Upload a document</h2>
+    <form action="/ui/documents" method="post" enctype="multipart/form-data">
+      <fieldset role="group">
+        <input type="file" name="file" accept=".pdf,.docx" required aria-label="PDF or DOCX file">
+        <button type="submit">Upload</button>
+      </fieldset>
+      <small>PDF or DOCX, up to 20 MB. The same file uploaded twice is rejected as a duplicate.</small>
+    </form>
+  </section>
+
+  <section id="documents">
+    <h2>2. Your documents ({{ documents | length }})</h2>
+    {% if documents %}
+    <div class="overflow-auto">
+      <table class="striped">
+        <thead>
+          <tr><th>File</th><th>Type</th><th>Pages</th><th>Chunks</th><th>Uploaded (UTC)</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for doc in documents %}
+          <tr>
+            <td>{{ doc.filename }}<br><small class="muted">{{ doc.document_id }}</small></td>
+            <td>{{ doc.file_type | upper }}</td>
+            <td>{{ doc.page_count if doc.page_count is not none else '-' }}</td>
+            <td>{{ doc.chunk_count }}</td>
+            <td>{{ doc.created_at[:16] | replace('T', ' ') }}</td>
+            <td>
+              <form action="/ui/documents/{{ doc.document_id }}/delete" method="post" class="inline">
+                <button type="submit" class="secondary outline small">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="empty">No documents yet. Upload a PDF or DOCX file to get started.</p>
+    {% endif %}
+  </section>
+
+  <section id="ask">
+    <h2>3. Ask a question</h2>
+    <form action="/ui/ask#answer" method="post">
+      <label for="question">Question</label>
+      <textarea id="question" name="question" rows="3" required maxlength="{{ max_question_chars }}"
+                placeholder="For example: What are the four functions of the AI RMF Core?">{{ question }}</textarea>
+      <div class="grid ask-row">
+        <label for="top_k">Chunks to retrieve (top-k)
+          <input id="top_k" name="top_k" type="number" min="1" max="{{ max_top_k }}" value="{{ top_k or '' }}">
+        </label>
+        <button type="submit">Ask</button>
+      </div>
+    </form>
+  </section>
+
+  {% if result %}
+  <section id="answer">
+    <h2>Answer</h2>
+    {% if result.answerable %}
+    <article class="answer">
+      <p>{{ result.answer | cite_links }}</p>
+      <footer>
+        <strong>Sources</strong>
+        <ul class="sources">
+          {% for chunk in result.citations %}
+          <li><a href="#chunk-{{ chunk.citation_id }}">[{{ chunk.citation_id }}]</a> {{ chunk.source_label }}</li>
+          {% endfor %}
+        </ul>
+      </footer>
+    </article>
+    {% else %}
+    <article class="refusal refusal-{{ result.refusal_reason }}">
+      <p><strong>{{ result.answer }}</strong></p>
+      <small class="muted">Reason: {{ result.refusal_reason | replace('_', ' ') }}</small>
+    </article>
+    {% endif %}
+
+    {% if result.general_knowledge %}
+    <article class="general">
+      <header><strong>Not from your documents</strong>: general knowledge from the language model, not checked against your files</header>
+      <p>{{ result.general_knowledge }}</p>
+    </article>
+    {% endif %}
+    <p class="muted"><small>Answered in {{ '%.0f' | format(result.latency_ms) }} ms.</small></p>
+
+    <details {{ 'open' if result.retrieved }}>
+      <summary>Retrieved chunks ({{ result.retrieved | length }})</summary>
+      {% for chunk in result.retrieved %}
+      {% set cited = chunk.citation_id in result.cited_ids %}
+      <article id="chunk-{{ chunk.citation_id }}" class="chunk {{ 'cited' if cited }}">
+        <header>
+          <strong>[{{ chunk.citation_id }}]</strong> {{ chunk.source_label }} · chunk {{ chunk.chunk_index }}
+          {% if cited %}<span class="pill ok">cited</span>{% endif %}
+          <div class="score">
+            <span>similarity {{ '%.3f' | format(chunk.score) }}</span>
+            <span class="bar"><span style="width: {{ [[chunk.score, 0] | max, 1] | min * 100 }}%"></span></span>
+          </div>
+        </header>
+        <p class="chunk-text">{{ chunk.text }}</p>
+      </article>
+      {% else %}
+      <p class="empty">No chunks were retrieved.</p>
+      {% endfor %}
+    </details>
+  </section>
+  {% endif %}
+</main>
+
+<footer class="container muted">
+  <small>Answers cite the retrieved chunks as [C1], [C2] and so on. Text in the "Not from your documents" box is general knowledge and is never cited.</small>
+</footer>
+</body>
+</html>

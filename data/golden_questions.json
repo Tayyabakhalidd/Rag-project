@@ -1,0 +1,240 @@
+{
+  "description": "Golden question set for the Production RAG Service. Sources are labelled by file name and page (PDF page position, or the 'Page N' label in the converted DOCX files), not by chunk ID, because chunk IDs differ between chunking configurations A and B. Each entry in expected_sources is one piece of evidence the answer needs; 'pages' lists the pages where that evidence appears (any one of them counts).",
+  "version": 1,
+  "questions": [
+    {
+      "id": "q01", "type": "single", "answerable": true,
+      "question": "What are the four functions of the AI RMF Core?",
+      "expected_sources": [{"filename": "NIST.AI.100-1.pdf", "pages": [25]}],
+      "reference_answer": "GOVERN, MAP, MEASURE and MANAGE. Each function is broken down into categories and subcategories.",
+      "notes": "Page 25, Section 5 AI RMF Core."
+    },
+    {
+      "id": "q02", "type": "single", "answerable": true,
+      "question": "How does the AI RMF define an AI system?",
+      "expected_sources": [{"filename": "NIST.AI.100-1.pdf", "pages": [6]}],
+      "reference_answer": "An engineered or machine-based system that can, for a given set of objectives, generate outputs such as predictions, recommendations, or decisions influencing real or virtual environments, designed to operate with varying levels of autonomy.",
+      "notes": "Executive Summary, adapted from OECD and ISO/IEC 22989."
+    },
+    {
+      "id": "q03", "type": "single", "answerable": true,
+      "question": "Which law directed NIST to develop the AI Risk Management Framework?",
+      "expected_sources": [{"filename": "NIST.AI.100-1.pdf", "pages": [7]}],
+      "reference_answer": "The National Artificial Intelligence Initiative Act of 2020 (P.L. 116-283).",
+      "notes": ""
+    },
+    {
+      "id": "q04", "type": "single", "answerable": true,
+      "question": "What characteristics of trustworthy AI systems does the AI RMF list?",
+      "expected_sources": [{"filename": "NIST.AI.100-1.pdf", "pages": [17, 7, 8]}],
+      "reference_answer": "Valid and reliable; safe; secure and resilient; accountable and transparent; explainable and interpretable; privacy-enhanced; and fair with harmful bias managed.",
+      "notes": "Main list on page 17 (Section 3); also summarised in the Executive Summary on pages 7-8."
+    },
+    {
+      "id": "q05", "type": "single", "answerable": true,
+      "question": "What are the three major categories of AI bias described in the AI RMF?",
+      "expected_sources": [{"filename": "NIST.AI.100-1.pdf", "pages": [23]}],
+      "reference_answer": "Systemic bias, computational and statistical bias, and human-cognitive bias.",
+      "notes": "Section 3.7 Fair - with Harmful Bias Managed."
+    },
+    {
+      "id": "q06", "type": "single", "answerable": true,
+      "question": "What are AI RMF use-case profiles and temporal profiles?",
+      "expected_sources": [{"filename": "NIST.AI.100-1.pdf", "pages": [38]}],
+      "reference_answer": "Use-case profiles implement the AI RMF functions, categories and subcategories for a specific setting or application (for example a hiring or fair housing profile). Temporal profiles describe either the current state or the desired target state of AI risk management activities.",
+      "notes": "Section 6 AI RMF Profiles."
+    },
+    {
+      "id": "q07", "type": "single", "answerable": true,
+      "question": "Does the AI RMF prescribe a level of risk tolerance for organizations?",
+      "expected_sources": [{"filename": "NIST.AI.100-1.pdf", "pages": [12]}],
+      "reference_answer": "No. The AI RMF can be used to prioritize risk but does not prescribe risk tolerance; risk tolerance is contextual and can be influenced by legal or regulatory requirements and by policies and norms of system owners, organizations, industries, communities or policy makers.",
+      "notes": "Section 1.2.2 Risk Tolerance."
+    },
+    {
+      "id": "q08", "type": "single", "answerable": true,
+      "question": "How does NIST AI 600-1 define confabulation?",
+      "expected_sources": [{"filename": "NIST.AI.600-1.docx", "pages": [8, 10]}],
+      "reference_answer": "The production of confidently stated but erroneous or false content, colloquially known as hallucinations or fabrications, by which users may be misled or deceived.",
+      "notes": "Short definition on page 8 (risk list); full description in Section 2.2 on page 10."
+    },
+    {
+      "id": "q09", "type": "single", "answerable": true,
+      "question": "Which four primary considerations did the Generative AI Public Working Group focus on?",
+      "expected_sources": [{"filename": "NIST.AI.600-1.docx", "pages": [6]}],
+      "reference_answer": "Governance, Content Provenance, Pre-deployment Testing, and Incident Disclosure.",
+      "notes": ""
+    },
+    {
+      "id": "q10", "type": "single", "answerable": true,
+      "question": "What does the Value Chain and Component Integration risk mean in the Generative AI Profile?",
+      "expected_sources": [{"filename": "NIST.AI.600-1.docx", "pages": [9, 16]}],
+      "reference_answer": "Non-transparent or untraceable integration of upstream third-party components, including improperly obtained or uncleaned data, and improper supplier vetting, which diminishes transparency or accountability for downstream users.",
+      "notes": "Risk 12; short definition page 9, Section 2.12 page 16."
+    },
+    {
+      "id": "q11", "type": "single", "answerable": true,
+      "question": "What is the difference between direct and indirect prompt injection?",
+      "expected_sources": [{"filename": "OWASP-Top-10-LLM-Applications-2025.docx", "pages": [7]}],
+      "reference_answer": "Direct prompt injection is when a user's own prompt input alters the model's behavior in unintended ways (intentionally or not). Indirect prompt injection is when the LLM accepts input from external sources such as websites or files whose content alters the model's behavior.",
+      "notes": "LLM01:2025 Prompt Injection."
+    },
+    {
+      "id": "q12", "type": "single", "answerable": true,
+      "question": "What are the root causes of Excessive Agency according to OWASP?",
+      "expected_sources": [{"filename": "OWASP-Top-10-LLM-Applications-2025.docx", "pages": [26]}],
+      "reference_answer": "Excessive functionality, excessive permissions, and excessive autonomy.",
+      "notes": "LLM06:2025 Excessive Agency."
+    },
+    {
+      "id": "q13", "type": "single", "answerable": true,
+      "question": "According to OWASP, should a system prompt be treated as a secret or a security control?",
+      "expected_sources": [{"filename": "OWASP-Top-10-LLM-Applications-2025.docx", "pages": [30]}],
+      "reference_answer": "No. The system prompt should not be considered a secret or used as a security control, so sensitive data such as credentials or connection strings should not be placed in it.",
+      "notes": "LLM07:2025 System Prompt Leakage."
+    },
+    {
+      "id": "q14", "type": "single", "answerable": true,
+      "question": "What is an embedding inversion attack in OWASP's Vector and Embedding Weaknesses risk?",
+      "expected_sources": [{"filename": "OWASP-Top-10-LLM-Applications-2025.docx", "pages": [33]}],
+      "reference_answer": "Attackers exploit vulnerabilities to invert embeddings and recover significant amounts of source information, compromising data confidentiality.",
+      "notes": "LLM08:2025."
+    },
+    {
+      "id": "q15", "type": "single", "answerable": true,
+      "question": "How much carbon can training a single transformer LLM emit, according to the Generative AI Profile?",
+      "expected_sources": [{"filename": "NIST.AI.600-1.docx", "pages": [12]}],
+      "reference_answer": "Current estimates suggest as much carbon as 300 round-trip flights between San Francisco and New York.",
+      "notes": "Section 2.5 Environmental Impacts."
+    },
+    {
+      "id": "q16", "type": "reworded", "answerable": true,
+      "question": "When a generative model confidently makes things up, what does the NIST profile call it?",
+      "expected_sources": [{"filename": "NIST.AI.600-1.docx", "pages": [8, 10]}],
+      "reference_answer": "Confabulation (also colloquially called hallucinations or fabrications).",
+      "notes": "Vocabulary mismatch: 'makes things up' vs 'confidently stated but erroneous or false content'."
+    },
+    {
+      "id": "q17", "type": "reworded", "answerable": true,
+      "question": "Why is it a bad idea to put database passwords in the instructions given to an LLM?",
+      "expected_sources": [{"filename": "OWASP-Top-10-LLM-Applications-2025.docx", "pages": [30]}],
+      "reference_answer": "Because the system prompt should not be considered a secret and can leak; credentials and connection strings should not be in the system prompt, and it must not be used as a security control.",
+      "notes": "Vocabulary mismatch: 'passwords in the instructions' vs 'credentials ... within the system prompt'."
+    },
+    {
+      "id": "q18", "type": "reworded", "answerable": true,
+      "question": "What problem arises when users trust a chatbot's answers too much without checking them?",
+      "expected_sources": [{"filename": "OWASP-Top-10-LLM-Applications-2025.docx", "pages": [36]}],
+      "reference_answer": "Overreliance: users place excessive trust in LLM-generated content and fail to verify it, which worsens the impact of misinformation as incorrect data enters critical decisions.",
+      "notes": "LLM09:2025 Misinformation. The Generative AI Profile's Human-AI Configuration risk (page 8) also mentions over-reliance."
+    },
+    {
+      "id": "q19", "type": "reworded", "answerable": true,
+      "question": "How can an attacker run up a company's cloud bill by abusing its LLM application?",
+      "expected_sources": [{"filename": "OWASP-Top-10-LLM-Applications-2025.docx", "pages": [39]}],
+      "reference_answer": "Denial of Wallet: by initiating a high volume of operations the attacker exploits the cost-per-use model of cloud AI services, creating unsustainable financial burdens (part of LLM10 Unbounded Consumption).",
+      "notes": "Vocabulary mismatch: 'run up the cloud bill' vs 'Denial of Wallet'."
+    },
+    {
+      "id": "q20", "type": "reworded", "answerable": true,
+      "question": "Which kinds of AI bias can happen even when nobody intends to discriminate?",
+      "expected_sources": [{"filename": "NIST.AI.100-1.pdf", "pages": [23]}],
+      "reference_answer": "All three categories (systemic, computational and statistical, and human-cognitive) can occur in the absence of prejudice, partiality, or discriminatory intent.",
+      "notes": ""
+    },
+    {
+      "id": "q21", "type": "multi_part", "answerable": true,
+      "question": "What does NIST AI 600-1 call AI hallucinations, and which OWASP 2025 risk covers the same problem?",
+      "expected_sources": [
+        {"filename": "NIST.AI.600-1.docx", "pages": [8, 10]},
+        {"filename": "OWASP-Top-10-LLM-Applications-2025.docx", "pages": [36]}
+      ],
+      "reference_answer": "NIST AI 600-1 calls it confabulation; OWASP covers it under LLM09:2025 Misinformation, whose major cause is hallucination.",
+      "notes": "Needs both documents."
+    },
+    {
+      "id": "q22", "type": "multi_part", "answerable": true,
+      "question": "How does the AI RMF describe secure and resilient AI, and what does OWASP recommend about model privileges to prevent prompt injection?",
+      "expected_sources": [
+        {"filename": "NIST.AI.100-1.pdf", "pages": [20]},
+        {"filename": "OWASP-Top-10-LLM-Applications-2025.docx", "pages": [9]}
+      ],
+      "reference_answer": "The AI RMF calls systems resilient if they withstand unexpected adverse events or changes and degrade safely; security concerns include adversarial examples, data poisoning and exfiltration of models or data. OWASP recommends enforcing privilege control and least privilege: give the application its own API tokens, handle functions in code, and restrict the model's privileges to the minimum necessary.",
+      "notes": "Needs both documents."
+    },
+    {
+      "id": "q23", "type": "multi_part", "answerable": true,
+      "question": "How do the OWASP Top 10 and the NIST Generative AI Profile each describe risks from third-party components such as pre-trained models?",
+      "expected_sources": [
+        {"filename": "OWASP-Top-10-LLM-Applications-2025.docx", "pages": [15]},
+        {"filename": "NIST.AI.600-1.docx", "pages": [9, 16]}
+      ],
+      "reference_answer": "OWASP LLM03 Supply Chain: supply chains are vulnerable through third-party pre-trained models and data that can be tampered with or poisoned. NIST AI 600-1 Value Chain and Component Integration: non-transparent integration of upstream third-party components, improperly obtained data and poor supplier vetting reduce transparency and accountability.",
+      "notes": "Needs both documents."
+    },
+    {
+      "id": "q24", "type": "multi_part", "answerable": true,
+      "question": "What is information integrity in the Generative AI Profile, and how does OWASP define misinformation?",
+      "expected_sources": [
+        {"filename": "NIST.AI.600-1.docx", "pages": [13, 8]},
+        {"filename": "OWASP-Top-10-LLM-Applications-2025.docx", "pages": [36]}
+      ],
+      "reference_answer": "Information integrity is the spectrum of information and patterns of its creation, exchange and consumption in society; high-integrity information can be trusted and distinguishes fact from fiction. OWASP defines misinformation as LLMs producing false or misleading information that appears credible.",
+      "notes": "Needs both documents."
+    },
+    {
+      "id": "q25", "type": "unanswerable", "answerable": false,
+      "question": "What fines does the EU AI Act set for companies that deploy non-compliant high-risk AI systems?",
+      "expected_sources": [], "reference_answer": "Not in the documents.",
+      "notes": "In domain (AI regulation) but none of the three documents mention the EU AI Act or fines."
+    },
+    {
+      "id": "q26", "type": "unanswerable", "answerable": false,
+      "question": "How much money did NIST spend to develop the AI Risk Management Framework?",
+      "expected_sources": [], "reference_answer": "Not in the documents.",
+      "notes": "No budget or cost figures appear in the corpus."
+    },
+    {
+      "id": "q27", "type": "unanswerable", "answerable": false,
+      "question": "What sampling temperature does OWASP recommend setting on an LLM to reduce misinformation?",
+      "expected_sources": [], "reference_answer": "Not in the documents.",
+      "notes": "The word 'temperature' does not appear in the corpus."
+    },
+    {
+      "id": "q28", "type": "unanswerable", "answerable": false,
+      "question": "What does ISO/IEC 42001 require before an organization can be certified for an AI management system?",
+      "expected_sources": [], "reference_answer": "Not in the documents.",
+      "notes": "ISO/IEC 42001 is not cited in the corpus."
+    },
+    {
+      "id": "q29", "type": "unanswerable", "answerable": false,
+      "question": "How many organizations had officially adopted the NIST AI RMF by the end of 2025?",
+      "expected_sources": [], "reference_answer": "Not in the documents.",
+      "notes": "No adoption statistics in the corpus."
+    },
+    {
+      "id": "q30", "type": "unanswerable", "answerable": false,
+      "question": "Which new risks will be added in the 2026 edition of the OWASP Top 10 for LLM Applications?",
+      "expected_sources": [], "reference_answer": "Not in the documents.",
+      "notes": "The corpus is the 2025 edition; nothing about 2026."
+    },
+    {
+      "id": "q31", "type": "off_topic", "answerable": false,
+      "question": "What is a good recipe for chocolate chip cookies?",
+      "expected_sources": [], "reference_answer": "Off-topic refusal.",
+      "notes": ""
+    },
+    {
+      "id": "q32", "type": "off_topic", "answerable": false,
+      "question": "Who won the FIFA World Cup in 2018?",
+      "expected_sources": [], "reference_answer": "Off-topic refusal.",
+      "notes": ""
+    },
+    {
+      "id": "q33", "type": "off_topic", "answerable": false,
+      "question": "How does photosynthesis turn sunlight into energy in plants?",
+      "expected_sources": [], "reference_answer": "Off-topic refusal.",
+      "notes": ""
+    }
+  ]
+}

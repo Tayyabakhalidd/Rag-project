@@ -1,0 +1,51 @@
+/* Small additions on top of Pico.css: banners, pills, chunk cards and score bars. */
+
+:root {
+  --ok: #1f8a4c;
+  --bad: #c0392b;
+  --warn: #b7791f;
+  --cited: #2b6cb0;
+}
+
+header.container { padding-top: 1.5rem; padding-bottom: 0; }
+section { margin-bottom: 2.5rem; }
+.muted { color: var(--pico-muted-color); }
+.empty { color: var(--pico-muted-color); font-style: italic; }
+
+.status-line { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+.pill {
+  display: inline-block;
+  padding: .1rem .6rem;
+  border-radius: 999px;
+  font-size: .8rem;
+  border: 1px solid currentColor;
+}
+.pill.ok { color: var(--ok); }
+.pill.bad { color: var(--bad); }
+
+.banner {
+  padding: .9rem 1.1rem;
+  border-radius: var(--pico-border-radius);
+  margin-bottom: 1.5rem;
+  border-left: 6px solid;
+}
+.banner.success { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 10%, transparent); }
+.banner.error { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 10%, transparent); }
+
+form.inline { margin: 0; }
+button.small { padding: .25rem .7rem; font-size: .85rem; margin: 0; }
+.ask-row { align-items: end; }
+
+article.answer { border-left: 6px solid var(--ok); }
+article.refusal { border-left: 6px solid var(--warn); }
+article.refusal-off_topic, article.refusal-output_blocked { border-left-color: var(--bad); }
+article.general { border-left: 6px dashed var(--pico-muted-color); background: var(--pico-card-sectioning-background-color); }
+.sources { margin-bottom: 0; }
+a.cite { font-weight: 600; text-decoration: none; }
+
+article.chunk { margin: 1rem 0; }
+article.chunk.cited { border-left: 6px solid var(--cited); }
+.chunk-text { white-space: pre-wrap; font-size: .9rem; margin-bottom: 0; }
+.score { display: flex; align-items: center; gap: .6rem; margin-top: .4rem; font-size: .85rem; }
+.bar { flex: 0 0 200px; height: .55rem; border-radius: 999px; background: var(--pico-muted-border-color); overflow: hidden; }
+.bar > span { display: block; height: 100%; background: var(--cited); }

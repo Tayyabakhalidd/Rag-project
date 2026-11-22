@@ -19,9 +19,16 @@ class AppError(Exception):
     code: str = "internal_error"
     message: str = "An unexpected error occurred."
 
-    def __init__(self, message: str | None = None, *, details: dict[str, Any] | None = None) -> None:
+    def __init__(
+        self,
+        message: str | None = None,
+        *,
+        details: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> None:
         self.message = message or self.message
         self.details = details or {}
+        self.headers = headers or {}  # extra response headers, e.g. Retry-After
         super().__init__(self.message)
 
 

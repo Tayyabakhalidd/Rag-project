@@ -11,7 +11,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -35,6 +35,11 @@ CHUNK_CONFIGS: dict[str, ChunkConfig] = {
 
 # File types accepted for upload, keyed by lower-case extension.
 SUPPORTED_EXTENSIONS: dict[str, str] = {".pdf": "pdf", ".docx": "docx"}
+
+# Request limits used by the API schemas (fixed, so they appear in the OpenAPI docs).
+MAX_QUESTION_CHARS = 1000
+MAX_TOP_K = 10
+MAX_DOCUMENT_FILTER = 20
 
 
 class Settings(BaseSettings):
@@ -70,9 +75,37 @@ class Settings(BaseSettings):
     embedding_model: str | None = Field(default=None, description="Gemini embedding model ID (OPEN decision)")
     embedding_dimensions: int = 768
     embedding_timeout_seconds: float = 20.0
+    embedding_batch_size: int = Field(default=50, ge=1, le=100, description="Texts per embedding request")
+
+    # --- Answer generation -------------------------------------------------
+    llm_temperature: float = Field(default=0.0, ge=0.0, le=1.0)
+    # For reasoning models the hidden reasoning counts toward this limit too.
+    llm_max_output_tokens: int = Field(default=2000, ge=100, le=8000)
+    # Sent only to reasoning-model families that accept it (see generation.py); "" disables it.
+    llm_reasoning_effort: str = Field(default="low", description="low | medium | high, or empty")
+    # Subject area of the corpus. Questions clearly outside it are refused.
+    corpus_topic: str = (
+        "AI risk management, trustworthy and responsible AI, generative AI risks, "
+        "and security risks of large language model (LLM) applications"
+    )
+
+    # --- Retrieval ---------------------------------------------------------
+    top_k: int = Field(default=5, ge=1, le=MAX_TOP_K, description="Chunks retrieved per question")
+    # Cosine-similarity cut-offs, calibrated on the golden set with gemini-embedding-001
+    # at 768 dimensions (see EVAL.md). Recalibrate if the embedding model changes.
+    # Off-topic questions scored 0.43-0.48 and in-domain questions 0.64 or more.
+    # Below the floor the question is refused as off-topic without calling the LLM.
+    off_topic_floor: float = Field(default=0.55, ge=0.0, le=1.0)
+    # Answerable questions scored at least 0.72. Below this score the documents are
+    # not trusted to answer, so no cited answer is given.
+    answer_threshold: float = Field(default=0.65, ge=0.0, le=1.0)
 
     # --- Reliability -------------------------------------------------------
     external_max_retries: int = Field(default=2, ge=0, le=5, description="Retries for LLM/embedding calls")
+
+    # --- Rate limiting (per client IP, in-memory, one server process) -----
+    questions_per_minute: int = Field(default=10, ge=1)
+    uploads_per_minute: int = Field(default=10, ge=1)
 
     # --- Upload limits -----------------------------------------------------
     max_upload_mb: int = Field(default=20, ge=1, description="Largest accepted upload, in MB")
@@ -83,6 +116,12 @@ class Settings(BaseSettings):
     # --- Chunking ----------------------------------------------------------
     chunk_config: Literal["A", "B"] = Field(default="A", description="Active chunking configuration")
     min_chunk_chars: int = Field(default=20, ge=1, description="Drop chunks shorter than this (non-space chars)")
+
+    @model_validator(mode="after")
+    def _check_thresholds(self) -> "Settings":
+        if self.off_topic_floor > self.answer_threshold:
+            raise ValueError("OFF_TOPIC_FLOOR must not be higher than ANSWER_THRESHOLD.")
+        return self
 
     @property
     def max_upload_bytes(self) -> int:
