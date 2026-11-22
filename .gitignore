@@ -3,8 +3,20 @@ __pycache__/
 *.py[codz]
 *$py.class
 
-#pdf 
+#pdf
 Portfolio-01-Production-RAG-Service.docx
+
+# Course brief and project plan: never commit or add to the corpus
+Production RAG Service Plan.pdf
+Portfolio-01-*.docx
+Portfolio-01-*.pdf
+
+# Runtime data: uploads, Chroma vectors, SQLite registry and embedding cache
+data/runtime/
+
+# Any env file except the placeholder template
+.env.*
+!.env.example
 # C extensions
 *.so
 
