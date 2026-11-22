@@ -21,6 +21,9 @@ from app.config import Settings, get_settings
 from app.errors import AppError
 from app.logging_setup import configure_logging
 from app.middleware import RequestContextMiddleware
+from app.storage.registry import DocumentRegistry
+from app.storage.vector_store import ChromaVectorStore
+from app.services.document_service import DocumentService
 
 logger = logging.getLogger("app")
 
@@ -70,7 +73,7 @@ def register_exception_handlers(app: FastAPI) -> None:
         return _error_response(request, exc.status_code, code, message, {})
 
 
-def create_app(settings: Settings | None = None) -> FastAPI:
+def create_app(settings: Settings | None = None, document_service: DocumentService | None = None) -> FastAPI:
     """Build and configure the FastAPI application."""
     settings = settings or get_settings()
     configure_logging(settings.log_level, settings.secret_values())
@@ -86,6 +89,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     # Make route dependencies use the same settings object the app was built with.
     app.dependency_overrides[get_settings] = lambda: settings
+    if document_service is None:
+        settings.data_dir.mkdir(parents=True, exist_ok=True)
+        registry = DocumentRegistry(settings.data_dir / "documents.sqlite3")
+        vectors = ChromaVectorStore(settings.data_dir / "chroma")
+        document_service = DocumentService(settings, registry, vectors)
+    app.state.document_service = document_service
 
     app.add_middleware(RequestContextMiddleware)
     register_exception_handlers(app)

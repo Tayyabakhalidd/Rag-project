@@ -59,3 +59,22 @@ class HealthResponse(BaseModel):
     environment: str
     llm_configured: bool = Field(description="Groq key and answer model are set.")
     embeddings_configured: bool = Field(description="Gemini key and embedding model are set.")
+
+
+class DocumentResponse(BaseModel):
+    """Safe metadata returned for an ingested document."""
+
+    document_id: str
+    filename: str
+    file_type: str
+    size_bytes: int
+    page_count: int | None
+    section_count: int
+    chunk_count: int
+    chunk_config: str
+    created_at: str
+
+
+class DocumentListResponse(BaseModel):
+    documents: list[DocumentResponse]
+    total: int

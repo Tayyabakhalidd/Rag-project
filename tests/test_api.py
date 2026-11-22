@@ -11,6 +11,7 @@ from app.logging_setup import JsonFormatter, redact
 from app.main import create_app
 from fastapi.testclient import TestClient
 from tests.conftest import FAKE_GEMINI_KEY, FAKE_GROQ_KEY
+from tests.factories import make_pdf
 
 
 def assert_error_shape(body: dict, code: str) -> None:
@@ -50,6 +51,51 @@ def test_openapi_docs_build_and_list_health(client):
     assert response.status_code == 200
     assert "/health" in response.json()["paths"]
     assert client.get("/docs").status_code == 200
+
+
+# --- Document ingestion API -----------------------------------------------
+
+def test_upload_list_duplicate_and_delete_document(client, app):
+    payload = make_pdf([["Production RAG service security guidance with enough text to index."]])
+    upload = client.post("/api/v1/documents", files={"file": ("guide.pdf", payload, "application/pdf")})
+    assert upload.status_code == 201, upload.text
+    document = upload.json()
+    assert document["filename"] == "guide.pdf"
+    assert document["chunk_count"] >= 1
+    document_id = document["document_id"]
+    service = app.state.document_service
+    assert service.vectors.count_for_document(document_id) == document["chunk_count"]
+
+    duplicate = client.post("/api/v1/documents", files={"file": ("renamed.pdf", payload, "application/pdf")})
+    assert duplicate.status_code == 409
+    assert_error_shape(duplicate.json(), "duplicate_document")
+    assert duplicate.json()["error"]["details"]["document_id"] == document_id
+
+    listing = client.get("/api/v1/documents")
+    assert listing.status_code == 200
+    assert listing.json()["total"] == 1
+    assert listing.json()["documents"][0]["document_id"] == document_id
+
+    deleted = client.delete(f"/api/v1/documents/{document_id}")
+    assert deleted.status_code == 204
+    assert service.vectors.count_for_document(document_id) == 0
+    assert client.get("/api/v1/documents").json() == {"documents": [], "total": 0}
+    missing = client.delete(f"/api/v1/documents/{document_id}")
+    assert missing.status_code == 404
+    assert_error_shape(missing.json(), "document_not_found")
+
+
+def test_document_upload_returns_validation_error(client):
+    response = client.post("/api/v1/documents", files={"file": ("notes.txt", b"hello", "text/plain")})
+    assert response.status_code == 415
+    assert_error_shape(response.json(), "unsupported_file_type")
+
+
+def test_openapi_lists_document_endpoints(client):
+    paths = client.get("/openapi.json").json()["paths"]
+    assert "/api/v1/documents" in paths
+    assert {"post", "get"} <= set(paths["/api/v1/documents"])
+    assert "delete" in paths["/api/v1/documents/{document_id}"]
 
 
 # --- Request IDs -----------------------------------------------------------

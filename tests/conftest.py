@@ -9,6 +9,26 @@ from fastapi.testclient import TestClient
 
 from app.config import Settings
 from app.main import create_app
+from app.storage.registry import DocumentRegistry
+from app.storage.vector_store import ChromaVectorStore
+from app.services.document_service import DocumentService
+
+
+class FakeEmbedder:
+    """Deterministic test provider; never makes a network request."""
+
+    def __init__(self, dimensions: int = 768):
+        self.dimensions = dimensions
+        self.calls = []
+
+    async def embed(self, texts):
+        self.calls.append(list(texts))
+        vectors = []
+        for text in texts:
+            # Stable, non-zero vector based on the text, padded to test dimensions.
+            value = (sum(text.encode("utf-8")) % 997 + 1) / 997
+            vectors.append([value] + [0.0] * (self.dimensions - 1))
+        return vectors
 
 FAKE_GROQ_KEY = "gsk_TESTONLYfakekey1234567890abcdef"
 FAKE_GEMINI_KEY = "AIzaTESTONLYfakekey1234567890abcdefgh"
@@ -32,7 +52,11 @@ def settings(tmp_path) -> Settings:
 @pytest.fixture
 def app(settings):
     """A fresh FastAPI app per test."""
-    return create_app(settings)
+    settings.data_dir.mkdir(parents=True, exist_ok=True)
+    registry = DocumentRegistry(settings.data_dir / "documents.sqlite3")
+    vectors = ChromaVectorStore(settings.data_dir / "chroma")
+    service = DocumentService(settings, registry, vectors, FakeEmbedder(settings.embedding_dimensions))
+    return create_app(settings, service)
 
 
 @pytest.fixture

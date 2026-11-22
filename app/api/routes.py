@@ -6,12 +6,18 @@ response model. Business logic lives in the service and pipeline modules.
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, Request, Response, UploadFile, status
 
 from app.config import Settings, get_settings
-from app.schemas import ErrorResponse, HealthResponse
+from app.schemas import DocumentListResponse, DocumentResponse, ErrorResponse, HealthResponse
+from app.ingestion.validation import read_upload_limited
+from app.services.document_service import DocumentService
 
 router = APIRouter()
+
+
+def get_document_service(request: Request) -> DocumentService:
+    return request.app.state.document_service
 
 
 @router.get(
@@ -33,3 +39,39 @@ async def health(settings: Annotated[Settings, Depends(get_settings)]) -> Health
         llm_configured=settings.groq_configured,
         embeddings_configured=settings.gemini_configured,
     )
+
+
+@router.post(
+    "/api/v1/documents", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED,
+    tags=["documents"], summary="Upload and index a PDF or DOCX document",
+    responses={400: {"model": ErrorResponse}, 409: {"model": ErrorResponse}, 413: {"model": ErrorResponse},
+               415: {"model": ErrorResponse}, 503: {"model": ErrorResponse}},
+)
+async def upload_document(
+    file: Annotated[UploadFile, File(description="PDF or DOCX document")],
+    settings: Annotated[Settings, Depends(get_settings)],
+    service: Annotated[DocumentService, Depends(get_document_service)],
+) -> DocumentResponse:
+    data = await read_upload_limited(file, settings.max_upload_bytes)
+    document = await service.upload(file.filename, data)
+    return DocumentResponse(**document)
+
+
+@router.get("/api/v1/documents", response_model=DocumentListResponse, tags=["documents"],
+            summary="List indexed documents")
+async def list_documents(
+    service: Annotated[DocumentService, Depends(get_document_service)],
+) -> DocumentListResponse:
+    documents = service.list_documents()
+    return DocumentListResponse(documents=documents, total=len(documents))
+
+
+@router.delete("/api/v1/documents/{document_id}", status_code=status.HTTP_204_NO_CONTENT,
+               tags=["documents"], summary="Delete a document and its vectors",
+               responses={404: {"model": ErrorResponse}})
+async def delete_document(
+    document_id: str,
+    service: Annotated[DocumentService, Depends(get_document_service)],
+) -> Response:
+    await service.delete(document_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

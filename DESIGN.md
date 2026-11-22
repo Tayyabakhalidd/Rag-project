@@ -7,16 +7,41 @@
 ## Ingestion flow
 
 ```
-upload -> validate -> extract -> chunk -> (embed -> store: next step)
+upload -> validate -> extract -> chunk -> embed -> store
           app/ingestion/validation.py
                       app/ingestion/extract.py
                                  app/ingestion/chunk.py
-          orchestrated by app/ingestion/pipeline.py::prepare_document
+orchestrated by app/ingestion/pipeline.py::prepare_document and
+app/services/document_service.py::DocumentService
 ```
 
 `prepare_document` contains no HTTP code, so the API route, the notebook and
 the evaluation script all call the same function. It is CPU-bound, so the API
-will run it in a worker thread.
+run it in a worker thread. Embedding calls are asynchronous and Chroma writes
+run in worker threads so upload processing does not block the event loop.
+
+## Embeddings and persistence
+
+The embedding adapter uses the OpenAI Python SDK with Google's OpenAI-compatible
+Gemini endpoint. `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS`,
+`EMBEDDING_TIMEOUT_SECONDS`, and `EXTERNAL_MAX_RETRIES` come from settings; the
+SDK enforces the timeout and bounded retry count. Rate limits and provider
+failures map to safe 503 application errors. Vector count, dimensionality, and
+finite values are checked before vectors are stored.
+
+Successful embeddings are cached in SQLite by a SHA-256 key over model ID,
+dimensions, and chunk text. The original text is not used as the cache key.
+SQLite also holds the document registry and enforces unique content hashes.
+An upload first reserves its content hash, then embeds and upserts its chunks
+into the persistent Chroma collection, and finally marks the registry row ready.
+If a later step fails, the service removes the partial registry/vector state.
+Chroma uses cosine distance and chunk IDs are stable (`document_id:index`).
+
+`POST /api/v1/documents` accepts multipart PDF/DOCX and returns 201 after
+indexing; identical file bytes return 409. `GET /api/v1/documents` returns only
+ready documents. `DELETE /api/v1/documents/{document_id}` deletes the document's
+vectors before removing its registry row, and returns 404 for an unknown ID.
+The API tests inject a deterministic fake embedder and never call Gemini.
 
 ## Upload validation
 
