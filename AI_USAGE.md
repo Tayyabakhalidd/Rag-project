@@ -37,7 +37,7 @@ Answers given in the multiple-choice questions (all recorded as decisions in DES
 
 ## Chat history
 
-Claude Code keeps the full session transcripts locally. They are submitted separately with the project, not committed to the repository, because they contain local file paths.
+The Claude Code project-session export is saved separately in Downloads as `Rag-project-Claude-Code-Transcript.zip`. It contains the session event log and a readable conversation transcript. Credential-like values are redacted and hidden reasoning is omitted; local paths remain. Submit the archive separately with the project, not in the Git repository.
 
 ## What I checked and understood myself
 
@@ -45,5 +45,5 @@ Claude Code keeps the full session transcripts locally. They are submitted separ
 
 - [ ] Read every module in `app/` and can explain its role in the flow.
 - [ ] Reviewed the golden set questions and their sources against the documents.
-- [ ] Hand-labelled the judge calibration sample (`evals/judge_calibration.csv`).
+- [x] Reviewed and approved the 15 judge-calibration labels (`evals/judge_calibration.csv`). Suggested labels were visible during review; see the independence caveat in `EVAL.md`.
 - [ ] Re-ran the tests and the evaluation myself.
