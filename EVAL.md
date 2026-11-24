@@ -2,7 +2,7 @@
 
 The original prompt-v1 baseline is saved in `evals/results/20261122T120041Z/`. The current A/B comparison uses two full prompt-v2 runs saved in `evals/results/20261124T132004Z/` and `evals/results/20261124T134115Z/`; each folder contains summaries, per-question CSVs, answers and judge verdicts.
 
-> **Status (24 Nov 2026).** Configurations A (1000/150) and B (500/75) were both evaluated twice with prompt v2. Retrieval scores were identical across the two runs. B is selected as the service default because relevant passages ranked higher (MRR and hit@1/3) and it showed a small average answer-correctness edge. A retrieved more of the expected evidence in the top five (higher recall@5). The choice and trade-off are detailed in section 5. The 15-row judge calibration file is ready for human labels; no human-vs-judge agreement is claimed yet.
+> **Status (24 Nov 2026).** Configurations A (1000/150) and B (500/75) were both evaluated twice with prompt v2. Retrieval scores were identical across the two runs. B is selected as the service default because relevant passages ranked higher (MRR and hit@1/3) and it showed a small average answer-correctness edge. A retrieved more of the expected evidence in the top five (higher recall@5). The choice and trade-off are detailed in section 5. The 15-row judge calibration sample was reviewed and approved by the user. All 15 approved labels match the judge (100% observed agreement); because suggested labels were shown during review, this is not an independent blind estimate of judge accuracy.
 
 ## 1. Method and tools
 
@@ -146,7 +146,7 @@ Prompt **v2** allows partial answers. In both prompt-v2 runs, config A gave a pa
 - The temporal-profile chunk (page 38, C1) was retrieved, and so was the *cross-sectoral* profile definition (page 39, C2).
 - The chunk containing the use-case profile definition, the start of page 38's section, ranked below the top 5.
 
-With config A, the model described use-case profiles using the cross-sectoral text. The judge gave correctness 0 but marked the answer *faithful*; that is the known judge error because the cited passage is about a different profile type. Config B answered q06 correctly (correctness 2) in both runs, consistent with its smaller chunks. The judge still needs human calibration (section 7).
+With config A, the model described use-case profiles using the cross-sectoral text. The judge gave correctness 0 but marked the answer *faithful*; that is the known judge error because the cited passage is about a different profile type. Config B answered q06 correctly (correctness 2) in both runs, consistent with its smaller chunks. The judge calibration sample is summarized in section 7.
 
 **q22: incomplete multi-part answer (correctness 1).** Both sources were retrieved (NIST page 20, OWASP page 9), and the answer is faithful. It left out two points of the reference: graceful degradation, and the specific security concerns (adversarial examples, data poisoning, exfiltration). This is answer completeness, not retrieval.
 
@@ -154,11 +154,11 @@ With config A, the model described use-case profiles using the cross-sectoral te
 
 - **Ranking noise.** Table-of-contents pages and front matter repeat titles, so they can outrank the useful passage; this still affects q21.
 - **B moves useful material up.** Across both runs, B had higher hit@1 and MRR and fixed q06, q14 and q24, but its lower recall@5 means it can miss some expected evidence.
-- **Citation ID checks are not the same as faithfulness.** Raw citation validity was 100%, but the judge found some unsupported or incomplete claims; human calibration is still needed. A reranker or neighbouring-chunk expansion could be future improvements.
+- **Citation ID checks are not the same as faithfulness.** Raw citation validity was 100%, but the judge found some unsupported or incomplete claims; the user-approved 15-row calibration sample matched the judge verdicts; see section 7 for the independence caveat. A reranker or neighbouring-chunk expansion could be future improvements.
 
 ## 7. Judge reliability
 
-- **Calibration sample.** The latest run produced a 15-row A/B sample, now copied to `evals/judge_calibration.csv`. It contains questions, answers, references, cited passages and judge scores, plus blank `human_faithful` and `human_correctness` columns. Fill both human columns for every row, then run `python -m evals.calibrate_judge`. **The labels are still blank**, so no judge agreement rate is claimed here.
+- **Calibration sample.** The latest run produced a 15-row A/B sample, now copied to `evals/judge_calibration.csv`. It contains questions, answers, references, cited passages and judge scores, with user-approved `human_faithful` and `human_correctness` labels. Running `python -m evals.calibrate_judge` reports 100% faithfulness agreement, 100% exact correctness agreement and 100% correctness agreement within one point on this sample. Because suggested labels were shown before approval, this is not an independent blind estimate of judge accuracy; treat the result as a checked comparison, not a validated accuracy claim.
 - **One judge error is known (config A, q06).** The judge marked as faithful an answer that attributed one profile type's definition to another. The correctness score caught the problem, but faithfulness did not. The judge is a 20B model from the same family as the answer model, so it may share blind spots.
 - **Run-to-run variation.** Groq models do not guarantee identical output even at temperature 0, so individual answers and verdicts can change between runs. The retrieval metrics are deterministic for a fixed index and embedding model: re-running A's retrieval pass from the cache gave identical numbers.
 
