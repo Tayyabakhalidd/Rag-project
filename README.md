@@ -152,7 +152,7 @@ python -m evals.run_evaluation --rejudge evals/results/<run>   # repeat only the
 python -m evals.calibrate_judge                         # judge vs. human labels (evals/judge_calibration.csv)
 ```
 
-**Current status:** configuration A is fully evaluated (results in [EVAL.md](EVAL.md)). Configuration B is pending because the Gemini free daily quota ran out while indexing it. After the quota resets (midnight Pacific time), run `python -m evals.run_evaluation --all` to evaluate both configurations with the current prompt.
+**Current status:** configurations A and B have both been evaluated twice with the current prompt (see [EVAL.md](EVAL.md) and `evals/results/`). Configuration B (500/75) is the selected default: it ranks the best passage higher and showed a small answer-correctness edge, while A had better recall across the top five. The 15-row judge-calibration sample still needs human labels.
 
 The run uses real APIs (free tiers). Embeddings are cached in SQLite, so re-runs barely touch the Gemini quota. Calls are made one at a time, and rate-limit errors are retried with growing waits, so a full run takes several minutes.
 

@@ -114,7 +114,7 @@ class Settings(BaseSettings):
     max_docx_zip_entries: int = Field(default=5000, ge=10)
 
     # --- Chunking ----------------------------------------------------------
-    chunk_config: Literal["A", "B"] = Field(default="A", description="Active chunking configuration")
+    chunk_config: Literal["A", "B"] = Field(default="B", description="Active chunking configuration")
     min_chunk_chars: int = Field(default=20, ge=1, description="Drop chunks shorter than this (non-space chars)")
 
     @model_validator(mode="after")

@@ -129,7 +129,7 @@ So the splitter picks cut points at `chunk_size − overlap`, and each chunk is 
 | A | 1000 | 150 | 511 |
 | B | 500 | 75 | 1,000 |
 
-Fragments with fewer than 20 visible characters, such as a lone figure label, are dropped. **The winning configuration is chosen from the evaluation; see section 6.** A is the default until B's evaluation run completes.
+Fragments with fewer than 20 visible characters, such as a lone figure label, are dropped. **Configuration B (500/75) is the selected default** after two A/B evaluation runs. B ranked relevant passages higher and showed a small answer-correctness edge; A retained more relevant evidence in its top five. See [EVAL.md](EVAL.md) for the metrics and trade-off.
 
 **Chunk metadata:** `chunk_id` (`{document_id}:{chunk_index}`), `document_id`, `filename`, `file_type`, `page`, `section`, `chunk_index`, `section_order`, `char_start`, `char_end`, `sha256`, `chunk_config`.
 
@@ -189,8 +189,8 @@ The cost is a second store to keep consistent, which is handled by the all-or-no
 
 | Setting | Value | Why |
 |---|---|---|
-| top-k | 5 (1–10 per request) | Five chunks of config A are about 5,000 characters, which fits the LLM prompt easily and leaves room for multi-part questions. EVAL.md reports hit@1/3/5 |
-| Chunking config | A (1000/150), provisional | A is fully evaluated (hit@5 0.958, MRR 0.732). B's run is pending a free-tier quota reset (EVAL.md), and the final choice will be made from both configurations' retrieval metrics |
+| top-k | 5 (1–10 per request) | Five chunks of selected config B are about 2,500 characters, which leaves room for multi-part questions in the LLM prompt. EVAL.md reports hit@1/3/5 |
+| Chunking config | B (500/75), selected | Across two prompt-v2 runs, B had higher MRR (0.764 vs 0.732), hit@1 (0.625 vs 0.583), and hit@3 (0.917 vs 0.875). A had better recall@5 (0.917 vs 0.875); see EVAL.md for the selection rationale. |
 | Off-topic floor | 0.55 | Off-topic golden questions scored 0.43–0.48 and in-domain ones at least 0.635. Below the floor the question is refused without calling the LLM (cheap, and visible as a guardrail) |
 | Answer threshold | 0.65 | Answerable golden questions scored at least 0.718. Below this, the documents are not trusted to answer, so no cited answer is given. Unanswerable questions overlap with answerable ones in score, so the LLM's `answerable` flag catches them, not this threshold |
 | Filters | optional `document_ids` | Ask about specific documents; unknown IDs return `404` |

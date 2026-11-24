@@ -364,7 +364,7 @@ class TestPipeline:
         assert doc.filename == "report.pdf"
         assert doc.file_type == "pdf"
         assert doc.page_count == 2
-        assert doc.chunk_config == ingest_settings.chunk_config == "A"
+        assert doc.chunk_config == ingest_settings.chunk_config == "B"
         assert doc.size_bytes == len(data)
         assert doc.document_id == hashlib.sha256(data).hexdigest()[:16]
 

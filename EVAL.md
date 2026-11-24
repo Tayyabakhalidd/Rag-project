@@ -1,8 +1,8 @@
 # Evaluation
 
-Every number in this file comes from a real run saved in `evals/results/20261122T120041Z/`. That folder holds `summary.md`, `summary.json`, the per-question CSV, every answer and every judge verdict.
+The original prompt-v1 baseline is saved in `evals/results/20261122T120041Z/`. The current A/B comparison uses two full prompt-v2 runs saved in `evals/results/20261124T132004Z/` and `evals/results/20261124T134115Z/`; each folder contains summaries, per-question CSVs, answers and judge verdicts.
 
-> **Status (22 Nov 2026).** Configuration **A** (1000/150) is fully evaluated: retrieval, answers and judge. Configuration **B** (500/75) could not be indexed yet. The Gemini free tier's daily quota ran out after about 940 embeddings, about 400 of B's 1,000 chunks in. The quota resets at midnight Pacific time. B, and the A-vs-B comparison, will be added by re-running `python -m evals.run_evaluation --all`. That run also re-evaluates A with prompt v2 (section 7), so both configurations use the same prompt. Until then, the chunking choice in section 5 is marked **pending**.
+> **Status (24 Nov 2026).** Configurations A (1000/150) and B (500/75) were both evaluated twice with prompt v2. Retrieval scores were identical across the two runs. B is selected as the service default because relevant passages ranked higher (MRR and hit@1/3) and it showed a small average answer-correctness edge. A retrieved more of the expected evidence in the top five (higher recall@5). The choice and trade-off are detailed in section 5. The 15-row judge calibration file is ready for human labels; no human-vs-judge agreement is claimed yet.
 
 ## 1. Method and tools
 
@@ -21,14 +21,15 @@ For each chunking configuration it:
 
 Each summary records the git commit, the model IDs, the prompt version, top-k and both thresholds.
 
-| Run 20261122T120041Z | |
+| Current runs | |
 |---|---|
+| Run IDs | `20261124T132004Z`, `20261124T134115Z` |
 | Answer model | `openai/gpt-oss-120b` (Groq, `reasoning_effort=low`, temperature 0) |
 | Judge model | `openai/gpt-oss-20b` (Groq) |
 | Embeddings | `gemini-embedding-001`, 768 dimensions |
 | Retrieval | top-k 5, cosine similarity, off-topic floor 0.55, answer threshold 0.65 |
-| Prompt | v1 |
-| Commit | `494ef3b` plus the uncommitted work of this step (the run happened before the commit) |
+| Prompt | v2 for both configurations |
+| Code revision | `87454ca`; result files were generated locally after that commit |
 
 **Why these tools.**
 
@@ -83,111 +84,82 @@ These are the best-chunk similarity scores of the golden questions, from the ret
 - **Unanswerable questions cannot be caught by similarity.** Their scores (0.635–0.842) overlap completely with answerable ones, because they use the corpus's vocabulary (e.g. "EU AI Act" and "high-risk AI systems"). The LLM's `answerable` flag must catch them, and it did (section 6).
 - **Caveat:** the thresholds were calibrated on the same 33 questions they are evaluated on, with only 3 off-topic examples. They are a sensible starting point, not proven cut-offs.
 
-## 5. Results
+## 5. Results and configuration choice
 
 ### Retrieval (24 answerable questions)
 
+The retrieval pass is deterministic for this corpus, embedding model and index, so both runs produced the same metrics.
+
 | Config | hit@1 | hit@3 | hit@5 | recall@1 | recall@3 | recall@5 | MRR |
 |---|---|---|---|---|---|---|---|
-| A (1000/150) | 0.583 | 0.875 | 0.958 | 0.542 | 0.854 | 0.917 | 0.732 |
-| B (500/75) | pending | pending | pending | pending | pending | pending | pending |
+| A (1000/150) | 0.583 | 0.875 | **0.958** | 0.542 | 0.854 | **0.917** | 0.732 |
+| B (500/75) | **0.625** | **0.917** | 0.917 | **0.604** | **0.875** | 0.875 | **0.764** |
 
-### Answers
+B more often puts a relevant chunk near the top. A more often includes all expected evidence somewhere in the first five. B also fixed three recurring A problems in both runs: q06 (confused definitions), q14 (missed the specific passage), and q24 (partly answered question). q21 remained a miss for both.
 
-| Metric | A |
-|---|---|
-| Answered rate on answerable questions | 0.875 (21 of 24) |
-| False-refusal rate | 0.125 (3 of 24) |
-| Faithfulness (judge, 21 answers) | 1.000 |
-| Mean correctness (0–2, all 24 answerable) | 1.625 |
-| Share with correctness 2 | 0.792 (19 of 24) |
-| Unanswerable handled correctly | 1.000 (6 of 6) |
-| Off-topic refused | 1.000 (3 of 3), all before any LLM call |
-| Citation validity (raw model output) | 1.000 |
-| Errors | 0 |
-| Latency p50 / p95 | 9.3 s / 12.9 s (see the note below) |
+### Answer quality across two runs
 
-**Latency note.** The evaluation pauses 2 s between LLM calls, and the Groq SDK silently waits out free-tier rate limits, so these numbers measure throttling more than the service. Unthrottled single questions took about 1.0–1.2 s in the notebook and on the first evaluation question (1,061 ms).
+Groq answers and judge ratings can vary between runs. Values below are the per-run rates and the simple mean of those two runs; this small sample is not a statistical guarantee.
 
-### Configuration comparison: pending
+| Metric | A run 1 | A run 2 | A mean | B run 1 | B run 2 | B mean |
+|---|---:|---:|---:|---:|---:|---:|
+| Answered rate on answerable questions | 0.917 | 0.917 | 0.917 | 0.917 | 0.917 | 0.917 |
+| Faithfulness (judge) | 0.955 | 0.909 | 0.932 | 0.909 | 0.909 | 0.909 |
+| Mean correctness (0–2) | 1.625 | 1.542 | 1.583 | 1.583 | 1.625 | **1.604** |
+| Fully correct share | 0.750 | 0.667 | 0.708 | 0.708 | 0.750 | **0.729** |
+| Unanswerable handled correctly | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| Off-topic refused before LLM call | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| Raw citation validity | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 
-The plan was to pick between A and B with the retrieval metrics (MRR and recall@5 first, hit@1 as the tie-breaker), then confirm with the answer metrics. **Until B has run, A stays the service default (`CHUNK_CONFIG=A`).** Expectations to be confirmed or refuted by the run:
+Both runs had zero API errors and judged 22 answers per configuration. Latency varied because the free-tier providers throttled calls; do not use these runs to claim a reliable speed advantage.
 
-- B's smaller chunks should rank the exact passage higher, which should improve hit@1. Two of A's failures (q06, q14) are relevant passages buried inside long chunks.
-- B's smaller chunks may also lose context that multi-part and definition questions need.
+### Decision: use configuration B (500/75)
 
-### Per-question results (config A)
+B is selected as the default because it gives the strongest first-result ranking (higher MRR, hit@1 and hit@3) and a small correctness advantage averaged over two answer runs. A is better if the priority is maximizing recall across all five retrieved chunks. This is a trade-off: B's recall@5 is 0.875 versus A's 0.917. Given the user experience and the repeated q06/q14/q24 improvements with B, the project prioritizes a more useful top-ranked passage and answer quality. The default is now `CHUNK_CONFIG=B`.
 
-| ID | Type | Best score | hit@1 | hit@5 | RR | Outcome | Faithful | Correctness |
-|---|---|---|---|---|---|---|---|---|
-| q01 | single | 0.789 | 1 | 1 | 1.00 | answered | yes | 2 |
-| q02 | single | 0.814 | 1 | 1 | 1.00 | answered | yes | 2 |
-| q03 | single | 0.804 | 0 | 1 | 0.20 | answered | yes | 2 |
-| q04 | single | 0.802 | 0 | 1 | 0.33 | answered | yes | 2 |
-| q05 | single | 0.779 | 1 | 1 | 1.00 | answered | yes | 2 |
-| q06 | single | 0.828 | 1 | 1 | 1.00 | answered | yes | **0** |
-| q07 | single | 0.877 | 1 | 1 | 1.00 | answered | yes | 2 |
-| q08 | single | 0.764 | 1 | 1 | 1.00 | answered | yes | 2 |
-| q09 | single | 0.765 | 1 | 1 | 1.00 | answered | yes | 2 |
-| q10 | single | 0.741 | 0 | 1 | 0.50 | answered | yes | 2 |
-| q11 | single | 0.764 | 1 | 1 | 1.00 | answered | yes | 2 |
-| q12 | single | 0.731 | 0 | 1 | 0.33 | answered | yes | 2 |
-| q13 | single | 0.738 | 0 | 1 | 0.50 | answered | yes | 2 |
-| q14 | single | 0.769 | 1 | 1 | 1.00 | **not_in_documents** | - | 0 |
-| q15 | single | 0.758 | 1 | 1 | 1.00 | answered | yes | 2 |
-| q16 | reworded | 0.741 | 0 | 1 | 0.50 | answered | yes | 2 |
-| q17 | reworded | 0.759 | 0 | 1 | 0.50 | answered | yes | 2 |
-| q18 | reworded | 0.734 | 1 | 1 | 1.00 | answered | yes | 2 |
-| q19 | reworded | 0.824 | 0 | 1 | 0.50 | answered | yes | 2 |
-| q20 | reworded | 0.733 | 1 | 1 | 1.00 | answered | yes | 2 |
-| q21 | multi_part | 0.743 | 0 | **0** | 0.00 | **not_in_documents** | - | 0 |
-| q22 | multi_part | 0.734 | 1 | 1 | 1.00 | answered | yes | 1 |
-| q23 | multi_part | 0.749 | 0 | 1 | 0.20 | answered | yes | 2 |
-| q24 | multi_part | 0.718 | 1 | 1 | 1.00 | **not_in_documents** | - | 0 |
-| q25–q30 | unanswerable | 0.635–0.842 | | | | not_in_documents (6/6) | | |
-| q31–q33 | off_topic | 0.426–0.477 | | | | off_topic (3/3), no LLM call | | |
+The set is small (24 answerable questions), and answer/judge results vary by run. Treat this as a reasoned project choice, not proof that B is universally better.
 
 ## 6. Failure analysis
 
-Five questions failed or were only partly right. Each was traced through the saved chunks in `answers_A.jsonl`.
+For configuration A with prompt v2, five questions were failed or only partly right. The two runs show which issues the smaller config B chunks helped with; each case was traced through the saved per-question results.
 
-**q21: retrieval fails on a broad two-document question (front matter wins).** *"What does NIST AI 600-1 call AI hallucinations, and which OWASP 2025 risk covers the same problem?"* The top 5 were:
+**q21: retrieval fails on a broad two-document question (front matter wins in both configs).** *"What does NIST AI 600-1 call AI hallucinations, and which OWASP 2025 risk covers the same problem?"* The top 5 were:
 
 - NIST AI 600-1 pages 1 and 2 (title page and front matter);
 - the OWASP title section (which has no page label);
 - NIST AI 100-1 page 1;
 - OWASP page 1.
 
-These pages mention both document names, so they match a question that *names the documents* better than the passages about confabulation (page 8) and misinformation (page 36) do. hit@5 is 0, and the model correctly refused rather than guess. *Fixes:* query decomposition (one search per sub-question); down-weighting or excluding title and front-matter sections; or hybrid search, where "confabulation" and "misinformation" as keywords would pull the right pages up.
+These pages mention both document names, so they match a question that *names the documents* better than the passages about confabulation (page 8) and misinformation (page 36) do. hit@5 is 0 for A and B, and both correctly refused rather than guess. *Fixes:* query decomposition (one search per sub-question); down-weighting or excluding title and front-matter sections; or hybrid search, where "confabulation" and "misinformation" as keywords would pull the right pages up.
 
 **q14: the page was found, but not the paragraph (a chunk-split effect).** *"What is an embedding inversion attack…?"* Page 33 is ranked 1st and 2nd, so the page-level metric counts it as a hit. The two retrieved chunks, however, cover the risk's *description* and items 1–2. Item 3, "Embedding Inversion Attacks", is in a later chunk of the same page that was not retrieved. The model said the chunks did not contain the answer. That is the right behaviour given what it saw, but it is a false refusal. This also shows a limit of page-level relevance labels: they overstate retrieval quality for long pages. *Fixes:* smaller chunks (config B is the test), or retrieving neighbouring chunks of a hit.
 
-**q24: a partly answerable two-part question was refused entirely.** *"What is information integrity in the Generative AI Profile, and how does OWASP define misinformation?"*
+**q24: a partly answerable two-part question exposed a prompt-v1 refusal.** *"What is information integrity in the Generative AI Profile, and how does OWASP define misinformation?"*
 
 - The OWASP definition (page 36) was retrieved first.
 - NIST AI 600-1 page 14 was retrieved, but not the page-13 paragraph that actually defines information integrity.
 
-With half the evidence, the v1 prompt's rule ("if the chunks do not contain the answer, set answerable to false") made the model refuse everything. *Fix applied:* prompt **v2** allows partial answers. It answers the covered part with citations and says which part the documents do not cover. Its effect will be measured in the next run.
+Prompt **v2** allows partial answers. In both prompt-v2 runs, config A gave a partial answer (correctness 1), while config B answered both parts (correctness 2).
 
 **q06: two definitions on neighbouring pages were mixed up.** *"What are AI RMF use-case profiles and temporal profiles?"*
 
 - The temporal-profile chunk (page 38, C1) was retrieved, and so was the *cross-sectoral* profile definition (page 39, C2).
 - The chunk containing the use-case profile definition, the start of page 38's section, ranked below the top 5.
 
-The model then described use-case profiles using the cross-sectoral text. The judge gave correctness 0 ("misstates use-case profiles as cross-sectoral") but marked the answer *faithful*. That is a judge error: the claim "use-case profiles are cross-sectoral profiles…" is not supported by C2, which is about a different profile type. *Fixes:* smaller chunks so each definition is its own chunk, and the judge reliability check in section 7.
+With config A, the model described use-case profiles using the cross-sectoral text. The judge gave correctness 0 but marked the answer *faithful*; that is the known judge error because the cited passage is about a different profile type. Config B answered q06 correctly (correctness 2) in both runs, consistent with its smaller chunks. The judge still needs human calibration (section 7).
 
 **q22: incomplete multi-part answer (correctness 1).** Both sources were retrieved (NIST page 20, OWASP page 9), and the answer is faithful. It left out two points of the reference: graceful degradation, and the specific security concerns (adversarial examples, data poisoning, exfiltration). This is answer completeness, not retrieval.
 
 **Patterns behind these failures.**
 
-- **Ranking noise.** Table-of-contents pages and front matter repeat headings and titles, so they rank near the top. In q01 they took positions 4 and 5, and they decided q21.
-- **The right page often comes second.** hit@1 is 0.583 against hit@5 0.958: a neighbouring page with similar vocabulary ranks first. A reranker would mostly improve hit@1 and MRR.
-- **Refusals are conservative, not hallucinated.** No answer was judged unfaithful, raw citation validity was 100%, and every failure was a refusal or an incomplete answer, never an invented fact.
+- **Ranking noise.** Table-of-contents pages and front matter repeat titles, so they can outrank the useful passage; this still affects q21.
+- **B moves useful material up.** Across both runs, B had higher hit@1 and MRR and fixed q06, q14 and q24, but its lower recall@5 means it can miss some expected evidence.
+- **Citation ID checks are not the same as faithfulness.** Raw citation validity was 100%, but the judge found some unsupported or incomplete claims; human calibration is still needed. A reranker or neighbouring-chunk expansion could be future improvements.
 
 ## 7. Judge reliability
 
-- **Calibration sample.** The run wrote a 15-row sample (`evals/judge_calibration.csv`) with the question, answer, reference, cited passages and the judge's scores, plus empty `human_faithful` and `human_correctness` columns. `python -m evals.calibrate_judge` reports the agreement rates and lists every disagreement. **The hand labels have not been filled in yet**, so no agreement rate is claimed here.
-- **One judge error is known (q06).** The judge marked as faithful an answer that attributed one profile type's definition to another. The correctness score caught the problem, but faithfulness did not. The judge is a 20B model from the same family as the answer model, so it may share blind spots.
+- **Calibration sample.** The latest run produced a 15-row A/B sample, now copied to `evals/judge_calibration.csv`. It contains questions, answers, references, cited passages and judge scores, plus blank `human_faithful` and `human_correctness` columns. Fill both human columns for every row, then run `python -m evals.calibrate_judge`. **The labels are still blank**, so no judge agreement rate is claimed here.
+- **One judge error is known (config A, q06).** The judge marked as faithful an answer that attributed one profile type's definition to another. The correctness score caught the problem, but faithfulness did not. The judge is a 20B model from the same family as the answer model, so it may share blind spots.
 - **Run-to-run variation.** Groq models do not guarantee identical output even at temperature 0, so individual answers and verdicts can change between runs. The retrieval metrics are deterministic for a fixed index and embedding model: re-running A's retrieval pass from the cache gave identical numbers.
 
 ## 8. Changes made because of this evaluation
@@ -196,9 +168,9 @@ The model then described use-case profiles using the cross-sectoral text. The ju
 |---|---|
 | Off-topic floor 0.55, answer threshold 0.65 | Calibrated from section 4 (the defaults before were placeholders) |
 | Prompt v2, rule 4: partial answers | q24 was refused entirely despite half the evidence |
-| Prompt v2, rule 5: labelled general background for uncovered in-domain questions | In run A the model never added it, which the approved design requires. The notebook shows the result, and also its risk: the background figure for EU AI Act fines appears to come from the 2021 draft, which is why it is labelled and never cited |
+| Prompt v2, rule 5: labelled general background for uncovered in-domain questions | In the original run A the model never added it, which the approved design requires. The notebook shows the result, and also its risk: the background figure for EU AI Act fines appears to come from the 2021 draft, which is why it is labelled and never cited |
 | Gemini embedding adapter keeps the response order when `index` is null | Found on the first live run; the endpoint returns `index: null` |
-| Embedding batches cached as they finish; evaluation saves results after each configuration | The free-tier quota ended the first runs partway through |
+| Embedding batches cached as they finish; evaluation saves results after each configuration | The free-tier quota ended initial runs partway through; later complete runs and their outputs are preserved under `evals/results/` |
 
 ## 9. Limitations
 
@@ -206,5 +178,5 @@ The model then described use-case profiles using the cross-sectoral text. The ju
 - **Page-level labels** overstate retrieval quality when a page holds several chunks (q14).
 - **Thresholds were calibrated on the evaluation set itself.**
 - **The judge is not yet validated against hand labels.**
-- **Single run.** No repeated runs to measure answer variance.
+- **Only two answer runs.** They show some run-to-run variation but are not enough to estimate a reliable distribution or confidence interval.
 - **Latency** was measured under free-tier throttling.

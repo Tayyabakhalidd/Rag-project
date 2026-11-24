@@ -1,0 +1,24 @@
+{"id": "q01", "faithful": true, "correctness": 2, "reason": "Answer matches reference and citations support all claims", "judged": true}
+{"id": "q02", "faithful": true, "correctness": 1, "reason": "Answer omits the key point about varying levels of autonomy.", "judged": true}
+{"id": "q03", "faithful": true, "correctness": 2, "reason": "Answer matches reference and is fully supported by citations", "judged": true}
+{"id": "q04", "faithful": true, "correctness": 2, "reason": "Answer matches reference exactly and all claims are cited.", "judged": true}
+{"id": "q05", "faithful": true, "correctness": 2, "reason": "Answer matches reference and cites supporting passage", "judged": true}
+{"id": "q06", "faithful": true, "correctness": 0, "reason": "Answer misrepresents use‑case profiles as cross‑sectoral, whereas reference defines them as specific to a setting or application.", "judged": true}
+{"id": "q07", "faithful": true, "correctness": 2, "reason": "Answer matches reference and is fully supported by citation", "judged": true}
+{"id": "q08", "faithful": true, "correctness": 1, "reason": "Answer covers main definition but omits the misled/deceived aspect of the reference.", "judged": true}
+{"id": "q09", "faithful": true, "correctness": 2, "reason": "Answer matches reference and citations fully", "judged": true}
+{"id": "q10", "faithful": false, "correctness": 1, "reason": "Answer adds unsupported claims about data‑poisoning, IP violations, and supply‑chain vulnerabilities.", "judged": true}
+{"id": "q11", "faithful": true, "correctness": 2, "reason": "Answer matches reference and all claims are cited", "judged": true}
+{"id": "q12", "faithful": true, "correctness": 2, "reason": "Answer matches reference and citations fully", "judged": true}
+{"id": "q13", "faithful": true, "correctness": 2, "reason": "Answer matches reference and is fully supported by citation", "judged": true}
+{"id": "q14", "faithful": null, "correctness": 0, "reason": "System did not give a cited answer.", "judged": false}
+{"id": "q15", "faithful": true, "correctness": 2, "reason": "Answer matches reference and citations support the claim", "judged": true}
+{"id": "q16", "faithful": true, "correctness": 2, "reason": "Answer matches the reference and is fully supported by the citation.", "judged": true}
+{"id": "q17", "faithful": true, "correctness": 2, "reason": "Answer fully supports reference points and cites appropriate passages", "judged": true}
+{"id": "q18", "faithful": true, "correctness": 2, "reason": "Answer fully supports reference points and cites relevant passages.", "judged": true}
+{"id": "q19", "faithful": true, "correctness": 2, "reason": "Answer fully supports reference points and cites relevant passages.", "judged": true}
+{"id": "q20", "faithful": true, "correctness": 2, "reason": "Answer matches reference and is fully supported by citation", "judged": true}
+{"id": "q21", "faithful": null, "correctness": 0, "reason": "System did not give a cited answer.", "judged": false}
+{"id": "q22", "faithful": true, "correctness": 1, "reason": "Answer is supported by citations but omits key points from the reference.", "judged": true}
+{"id": "q23", "faithful": true, "correctness": 2, "reason": "All claims are supported by the cited passages and the answer fully reflects the reference points.", "judged": true}
+{"id": "q24", "faithful": false, "correctness": 1, "reason": "The answer omits the definition of information integrity and claims its absence without evidence, so it is not fully faithful or correct.", "judged": true}

@@ -70,8 +70,8 @@ DOCUMENT_EXAMPLE = {
     "size_bytes": 1946127,
     "page_count": 48,
     "section_count": 48,
-    "chunk_count": 152,
-    "chunk_config": "A",
+    "chunk_count": 304,
+    "chunk_config": "B",
     "created_at": "2026-11-22T12:00:44.483341+00:00",
 }
 

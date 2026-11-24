@@ -1,0 +1,24 @@
+{"id": "q01", "faithful": true, "correctness": 2, "reason": "Answer matches reference and cites supporting passage", "judged": true}
+{"id": "q02", "faithful": true, "correctness": 1, "reason": "Answer lacks the autonomy detail from the reference.", "judged": true}
+{"id": "q03", "faithful": null, "correctness": 0, "reason": "System did not give a cited answer.", "judged": false}
+{"id": "q04", "faithful": true, "correctness": 2, "reason": "Answer matches reference exactly and all claims are supported by citations", "judged": true}
+{"id": "q05", "faithful": true, "correctness": 2, "reason": "Answer matches reference and citations support all claims", "judged": true}
+{"id": "q06", "faithful": true, "correctness": 2, "reason": "Answer fully matches the reference and is supported by the cited passages", "judged": true}
+{"id": "q07", "faithful": true, "correctness": 2, "reason": "Answer matches reference and all claims are supported by citations", "judged": true}
+{"id": "q08", "faithful": true, "correctness": 2, "reason": "All claims are supported by citations and match the reference.", "judged": true}
+{"id": "q09", "faithful": true, "correctness": 2, "reason": "Answer matches reference and is fully supported by citations", "judged": true}
+{"id": "q10", "faithful": false, "correctness": 1, "reason": "The answer adds an unsupported claim about misuse or unanticipated impacts.", "judged": true}
+{"id": "q11", "faithful": true, "correctness": 2, "reason": "Answer matches reference and all claims are supported by citations", "judged": true}
+{"id": "q12", "faithful": true, "correctness": 2, "reason": "Answer matches reference and cites all claims", "judged": true}
+{"id": "q13", "faithful": true, "correctness": 2, "reason": "Answer matches reference and is fully supported by citation", "judged": true}
+{"id": "q14", "faithful": true, "correctness": 2, "reason": "Answer fully supports reference and citations.", "judged": true}
+{"id": "q15", "faithful": true, "correctness": 2, "reason": "Answer matches reference and is fully supported by citations", "judged": true}
+{"id": "q16", "faithful": true, "correctness": 2, "reason": "Answer matches reference and citations fully support the claim", "judged": true}
+{"id": "q17", "faithful": true, "correctness": 2, "reason": "Answer fully supports reference points and cites relevant passages.", "judged": true}
+{"id": "q18", "faithful": true, "correctness": 2, "reason": "Answer fully supports reference and cites passages.", "judged": true}
+{"id": "q19", "faithful": true, "correctness": 2, "reason": "All claims are supported by the cited passages and fully align with the reference.", "judged": true}
+{"id": "q20", "faithful": true, "correctness": 2, "reason": "Answer matches reference and citations fully", "judged": true}
+{"id": "q21", "faithful": null, "correctness": 0, "reason": "System did not give a cited answer.", "judged": false}
+{"id": "q22", "faithful": false, "correctness": 0, "reason": "Answer contains unsupported claims and omits key reference points.", "judged": true}
+{"id": "q23", "faithful": true, "correctness": 1, "reason": "Answer cites all claims but omits NIST’s mention of non‑transparent integration and poor supplier vetting.", "judged": true}
+{"id": "q24", "faithful": true, "correctness": 2, "reason": "All claims are supported by citations and match the reference.", "judged": true}
